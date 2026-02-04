@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>抽奖系统后台 - 完整原型（菜单切换已修复）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root{--primary:#1890ff;--success:#52c41a;--danger:#f5222d;--gray:#f0f2f5;--text:#333;--border:#d9d9d9}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:system-ui,sans-serif;background:var(--gray);color:var(--text);height:100vh;overflow:hidden}
+    .layout{display:flex;height:100vh}
+    .sidebar{width:240px;background:#001529;color:#fff;overflow-y:auto}
+    .sidebar .logo{padding:20px;font-size:22px;font-weight:bold;border-bottom:1px solid #0f2a47}
+    .sidebar ul{list-style:none;margin-top:16px}
+    .sidebar li{padding:14px 24px;cursor:pointer;transition:.3s}
+    .sidebar li:hover{background:#0f2a47}
+    .sidebar li.active{background:var(--primary);font-weight:bold}
+    .main{flex:1;display:flex;flex-direction:column}
+    .header{height:64px;background:#fff;border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+    .content{flex:1;padding:24px;overflow-y:auto}
+    .card{background:#fff;border-radius:8px;padding:20px;margin-bottom:24px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+    table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden}
+    th,td{padding:12px 16px;text-align:left;border-bottom:1px solid #f0f0f0}
+    th{background:#fafafa}
+    .btn{padding:6px 16px;border:none;border-radius:4px;cursor:pointer;color:#fff;font-size:14px}
+    .btn-primary{background:var(--primary)}
+    .btn-danger{background:var(--danger)}
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;z-index:1000}
+    .modal-content{background:#fff;width:90%;max-width:480px;border-radius:8px;padding:24px}
+    .status-running{color:var(--success);font-weight:bold}
+    .status-ended{color:#faad14;font-weight:bold}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="layout">
+  <!-- 侧边栏 -->
+  <div class="sidebar">
+    <div class="logo">抽奖系统后台</div>
+    <ul id="menu">
+      <li data-page="0" class="active">仪表盘</li>
+      <li data-page="1">活动管理</li>
+      <li data-page="2">奖品管理</li>
+      <li data-page="3">参与记录</li>
+      <li data-page="4">开奖管理</li>
+      <li data-page="5">中奖干预</li>
+      <li data-page="6">数据统计</li>
+      <li data-page="logout" style="margin-top:40px">退出登录</li>
+    </ul>
+  </div>
+
+  <!-- 主内容 -->
+  <div class="main">
+    <div class="header">
+      <div>欢迎，管理员潇</div>
+      <div id="currentTime"></div>
+    </div>
+
+    <div class="content" id="pages">
+      <!-- 0 仪表盘 -->
+      <div id="page0">
+        <div class="card">
+          <h2 style="margin-bottom:16px">今日概览</h2>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+            <div><strong>进行中活动</strong><br><span style="font-size:36px;color:var(--primary)">8</span><br><small>↑12% 本周</small></div>
+            <div><strong>总参与人数</strong><br><span style="font-size:36px;color:var(--primary)">45,672</span><br><small>↑18% 本周</small></div>
+            <div><strong>总抽奖码</strong><br><span style="font-size:36px;color:var(--primary)">68,941</span><br><small>↑15% 本周</small></div>
+            <div><strong>待开奖活动</strong><br><span style="font-size:36px;color:#faad14">3</span></div>
+          </div>
+        </div>
+        <div class="card"><canvas id="trendChart" height="80"></canvas></div>
+      </div>
+
+      <!-- 1 活动管理 -->
+      <div id="page1" style="display:none">
+        <button class="btn btn-primary" style="margin-bottom:16px" onclick="showModal('新建活动')">+ 新建活动</button>
+        <table>
+          <thead><tr><th>ID</th><th>活动名称</th><th>时间</th><th>参与人数</th><th>状态</th><th>操作</th></tr></thead>
+          <tbody>
+            <tr><td>1001</td><td>2026双11福利大抽奖</td><td>02-01~02-28</td><td>12,345</td><td><span class="status-running">进行中</span></td><td><button class="btn" style="background:#1890ff;color:white" onclick="showModal('编辑活动')">编辑</button></td></tr>
+            <tr><td>1002</td><td>春节集卡活动</td><td>01-15~01-29</td><td>28,910</td><td><span class="status-ended">已结束</span></td><td><button class="btn" style="background:#1890ff;color:white">查看</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 2 奖品管理 -->
+      <div id="page2" style="display:none">
+        <div class="card">
+          <h3>当前活动奖品（可拖拽排序）</h3>
+          <div id="prizeList">
+            <div class="card" style="margin:8px 0;padding:12px;cursor:move">一等奖 iPhone 16 Pro × 5 <button class="btn btn-danger" style="float:right" onclick="this.parentNode.remove()">删除</button></div>
+            <div class="card" style="margin:8px 0;padding:12px;cursor:move">二等奖 AirPods Pro × 20 <button class="btn btn-danger" style="float:right" onclick="this.parentNode.remove()">删除</button></div>
+          </div>
+          <button class="btn btn-primary" onclick="alert('模拟添加奖品')">+ 添加奖品</button>
+        </div>
+      </div>
+
+      <!-- 3 参与记录 -->
+      <div id="page3" style="display:none">
+        <table>
+          <thead><tr><th>用户ID</th><th>抽奖码</th><th>获得时间</th><th>方式</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td>u12345</td><td>628413</td><td>02-03 19:45</td><td>分享</td><td>待开奖</td></tr>
+            <tr><td>u67890</td><td>749102</td><td>02-03 20:10</td><td>签到</td><td>待开奖</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 4 开奖管理 -->
+      <div id="page4" style="display:none">
+        <div class="card">
+          <h3>当前活动：2026双11福利大抽奖</h3>
+          <p>开奖时间：2026-03-05 20:00:00</p>
+          <div style="margin:20px 0">
+            <label>整体中奖概率（人工干预）：<strong id="rateVal">100</strong>%</label><br>
+            <input type="range" min="0" max="100" value="100" id="rateSlider" style="width:100%" oninput="document.getElementById('rateVal').innerText=this.value">
+          </div>
+          <button class="btn btn-danger" style="padding:12px 32px;font-size:18px" onclick="document.getElementById('drawLog').style.display='block';alert('开奖模拟完成！概率：'+document.getElementById('rateVal').innerText+'%')">一键开奖</button>
+          <div id="drawLog" style="margin-top:24px;display:none;background:#f6ffed;padding:16px;border-radius:8px">
+            <p>开奖成功！随机种子：0xA1B2C3D4</p>
+            <p>实际中奖人数：4,872 人（应用概率 78%）</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5 中奖干预 -->
+      <div id="page5" style="display:none">
+        <table>
+          <thead><tr><th>抽奖码</th><th>用户</th><th>奖品</th><th>操作</th></tr></thead>
+          <tbody>
+            <tr><td>628413</td><td>用户A</td><td>一等奖</td><td><button class="btn" onclick="this.parentNode.parentNode.cells[2].innerText='二等奖'">改奖</button> <button class="btn btn-danger" onclick="this.parentNode.parentNode.style.opacity=0.4">取消中奖</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 6 数据统计 -->
+      <div id="page6" style="display:none">
+        <div class="card"><canvas id="statChart" height="140"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 弹窗 -->
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <h3 id="modalTitle">操作</h3>
+    <input id="modalInput" style="width:100%;padding:10px;margin:16px 0;border:1px solid var(--border);border-radius:4px" placeholder="请输入...">
+    <div style="text-align:right">
+      <button class="btn" style="background:#999" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="closeModal();alert('保存成功（模拟）')">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// 页面切换
+document.querySelectorAll('#menu li').forEach(item => {
+  item.addEventListener('click', function() {
+    const page = this.getAttribute('data-page');
+    if (page === 'logout') {
+      if (confirm('确定退出登录？')) location.reload();
+      return;
+    }
+    document.querySelectorAll('#pages > div').forEach(p => p.style.display = 'none');
+    document.getElementById('page' + page).style.display = 'block';
+    
+    document.querySelectorAll('#menu li').forEach(li => li.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// 时间显示
+setInterval(() => {
+  document.getElementById('currentTime').innerText = new Date().toLocaleString('zh-CN');
+}, 1000);
+
+// 图表
+window.addEventListener('load', () => {
+  new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+      labels: ['1/28','1/29','1/30','1/31','2/1','2/2','2/3'],
+      datasets: [{label:'参与人数',data:[1200,1800,2500,3100,4200,5100,6800],borderColor:'#1890ff',tension:0.4}]
+    }
+  });
+  new Chart(document.getElementById('statChart'), {
+    type: 'bar',
+    data: {
+      labels: ['一等奖','二等奖','三等奖','谢谢参与'],
+      datasets: [{label:'发放数量',data:[5,20,100,45600],backgroundColor:['#ff4d4f','#faad14','#52c41a','#999']}]
+    }
+  });
+});
+
+// 弹窗控制
+function showModal(title) {
+  document.getElementById('modalTitle').innerText = title;
+  document.getElementById('modal').style.display = 'flex';
+}
+function closeModal() {
+  document.getElementById('modal').style.display = 'none';
+}
+</script>
+</body>
+</html>
