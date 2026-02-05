@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>参与任务 - 得抽奖码</title>
+  <style>
+    body { margin:0; font-family:sans-serif; background:#f8f9fa; min-height:100vh; }
+    .container { max-width:420px; margin:0 auto; padding:20px; }
+    h1 { text-align:center; color:#d32f2f; margin:40px 0 30px; }
+    .task-card { background:white; border-radius:12px; padding:20px; margin-bottom:20px; box-shadow:0 2px 10px rgba(0,0,0,0.1); }
+    .task-title { font-size:18px; font-weight:bold; margin-bottom:12px; }
+    .btn { display:block; width:100%; padding:14px; margin:12px 0; font-size:16px; border:none; border-radius:8px; cursor:pointer; }
+    .btn-primary { background:#ff4d4f; color:white; }
+    .btn-success { background:#4caf50; color:white; }
+    .btn-disabled { background:#ccc; color:#666; cursor:not-allowed; }
+    .result { text-align:center; font-size:24px; font-weight:bold; color:#4caf50; margin:40px 0; display:none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>完成任务得抽奖码</h1>
+
+    <div class="task-card">
+      <div class="task-title">1. 关注公众号</div>
+      <button class="btn btn-primary" id="followBtn">立即关注</button>
+      <div id="followDone" class="btn btn-success" style="display:none;">已完成</div>
+    </div>
+
+    <div class="task-card">
+      <div class="task-title">2. 分享到朋友圈</div>
+      <button class="btn btn-primary" id="shareBtn">去分享</button>
+      <div id="shareDone" class="btn btn-success" style="display:none;">已分享</div>
+    </div>
+
+    <button class="btn btn-primary" id="getCodeBtn" disabled>领取抽奖码</button>
+
+    <div class="result" id="codeResult">
+      恭喜！你的抽奖码是：<br><span style="font-size:36px; color:#ff4d4f;">628413</span>
+    </div>
+  </div>
+
+  <script>
+    let tasks = { follow: false, share: false };
+
+    document.getElementById('followBtn').onclick = () => {
+      tasks.follow = true;
+      document.getElementById('followBtn').style.display = 'none';
+      document.getElementById('followDone').style.display = 'block';
+      checkAllDone();
+    };
+
+    document.getElementById('shareBtn').onclick = () => {
+      tasks.share = true;
+      document.getElementById('shareBtn').style.display = 'none';
+      document.getElementById('shareDone').style.display = 'block';
+      checkAllDone();
+    };
+
+    function checkAllDone() {
+      if (tasks.follow && tasks.share) {
+        document.getElementById('getCodeBtn').disabled = false;
+      }
+    }
+
+    document.getElementById('getCodeBtn').onclick = () => {
+      document.getElementById('codeResult').style.display = 'block';
+      document.getElementById('getCodeBtn').style.display = 'none';
+    };
+  </script>
+</body>
+</html>
