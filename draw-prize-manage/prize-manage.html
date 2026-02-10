@@ -10,6 +10,30 @@
     .prize { background:#fff; padding:16px; margin:16px 0; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1); display:flex; justify-content:space-between; align-items:center; }
     .btn { padding:8px 16px; background:#1890ff; color:#fff; border:none; border-radius:4px; cursor:pointer; }
     .btn-danger { background:#f5222d; }
+    
+    /* 弹窗样式 */
+    .modal { 
+      display:none; 
+      position:fixed; 
+      inset:0; 
+      background:rgba(0,0,0,0.6); 
+      align-items:center; 
+      justify-content:center; 
+      z-index:1000; 
+    }
+    .modal-content { 
+      background:#fff; 
+      width:90%; 
+      max-width:600px; 
+      border-radius:12px; 
+      padding:32px; 
+      box-shadow:0 10px 30px rgba(0,0,0,0.2); 
+    }
+    .form-row { display:flex; gap:16px; margin-bottom:16px; align-items:flex-start; flex-wrap:wrap; }
+    .form-row label { flex:0 0 140px; text-align:right; padding-top:10px; font-weight:600; }
+    .form-row .control { flex:1; min-width:200px; }
+    .hidden { display:none !important; }
+    .prize-preview { margin-top:12px; padding:12px; background:#f0f5ff; border-radius:6px; }
   </style>
 </head>
 <body>
@@ -20,7 +44,7 @@
   <ul style="list-style:none;margin:16px 0;padding:0">
     <li data-page="dashboard.html" style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='dashboard.html'">仪表盘</li>
     <li data-page="activity-list.html" style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='activity-list.html'">活动管理</li>
-    <li data-page="prize-manage.html" style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='prize-manage.html'">奖品管理</li>
+    <li data-page="prize-manage.html" style="padding:14px 24px;cursor:pointer;transition:0.3s;background:#1890ff;font-weight:bold">奖品管理</li>
     <li data-page="entry-list.html" style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='entry-list.html'">参与记录</li>
     <li data-page="draw-manage.html" style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='draw-manage.html'">开奖管理</li>
     <li data-page="winner-intervene.html" style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='winner-intervene.html'">中奖干预</li>
@@ -34,27 +58,93 @@
   <h1>奖品管理</h1>
   <h3>当前活动奖品（支持拖拽排序）</h3>
 
-  <div class="prize">
-    <div>一等奖：iPhone 16 Pro 256GB × 5</div>
-    <button class="btn-danger" onclick="this.parentNode.remove()">删除</button>
+  <div id="prizeList">
+    <div class="prize">
+      <div>一等奖：iPhone 16 Pro 256GB × 5（实物）</div>
+      <button class="btn-danger" onclick="this.parentNode.remove()">删除</button>
+    </div>
+    <div class="prize">
+      <div>二等奖：5000积分 × 20（积分）</div>
+      <button class="btn-danger" onclick="this.parentNode.remove()">删除</button>
+    </div>
+    <div class="prize">
+      <div>三等奖：88元无门槛券（优惠券） × 200</div>
+      <button class="btn-danger" onclick="this.parentNode.remove()">删除</button>
+    </div>
   </div>
 
-  <div class="prize">
-    <div>二等奖：AirPods Pro 2 × 20</div>
-    <button class="btn-danger" onclick="this.parentNode.remove()">删除</button>
-  </div>
+  <button class="btn" onclick="openPrizeModal()">+ 添加奖品</button>
+</div>
 
-  <div class="prize">
-    <div>三等奖：88元无门槛红包 × 200</div>
-    <button class="btn-danger" onclick="this.parentNode.remove()">删除</button>
-  </div>
+<!-- 奖品配置弹窗 -->
+<div class="modal" id="prizeModal">
+  <div class="modal-content">
+    <h2 style="margin-top:0">添加/编辑奖品</h2>
+    
+    <div class="form-row">
+      <label>奖级</label>
+      <div class="control">
+        <input type="text" id="prizeLevel" placeholder="如：一等奖、二等奖" value="一等奖">
+      </div>
+    </div>
 
-  <div class="prize">
-    <div>参与奖：谢谢参与（不限数量）</div>
-    <span style="color:#999">不可删除</span>
-  </div>
+    <div class="form-row">
+      <label>奖品类型</label>
+      <div class="control">
+        <select id="prizeType" onchange="togglePrizeFields()">
+          <option value="physical">实物奖</option>
+          <option value="points">积分奖</option>
+          <option value="coupon">优惠券</option>
+        </select>
+      </div>
+    </div>
 
-  <button class="btn" onclick="alert('已添加新奖品（模拟）')">+ 添加奖品</button>
+    <!-- 实物奖字段 -->
+    <div id="physicalFields" class="form-row">
+      <label>实物奖品ID</label>
+      <div class="control">
+        <input type="text" id="physicalId" placeholder="输入系统中实物奖品ID" value="P1001">
+        <div id="physicalPreview" class="prize-preview" style="display:none;">
+          <strong>预览：</strong> iPhone 16 Pro 256GB | ￥8999 | <img src="https://via.placeholder.com/60x60" style="vertical-align:middle" alt="奖品图">
+        </div>
+      </div>
+    </div>
+
+    <!-- 积分奖字段 -->
+    <div id="pointsFields" class="form-row hidden">
+      <label>奖励积分数量</label>
+      <div class="control">
+        <input type="number" id="pointsAmount" min="1" placeholder="如：5000" value="5000">
+      </div>
+    </div>
+
+    <!-- 优惠券字段 -->
+    <div id="couponFields" class="form-row hidden">
+      <label>优惠券码</label>
+      <div class="control">
+        <input type="text" id="couponCode" placeholder="如：DOUBLE11-88" value="DOUBLE11-88">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label>发放数量</label>
+      <div class="control">
+        <input type="number" id="prizeQuantity" min="1" value="10">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label>中奖权重</label>
+      <div class="control">
+        <input type="number" id="prizeWeight" min="1" value="20">
+      </div>
+    </div>
+
+    <div style="text-align:right;margin-top:32px;">
+      <button class="btn" style="background:#999;color:#fff" onclick="closePrizeModal()">取消</button>
+      <button class="btn btn-primary" onclick="savePrize()">确认添加</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -73,6 +163,66 @@ document.querySelectorAll('li').forEach(li => {
     if (!li.style.background.includes('#1890ff')) li.style.background = '';
   });
 });
+
+// 打开弹窗
+function openPrizeModal() {
+  document.getElementById('prizeModal').style.display = 'flex';
+  togglePrizeFields(); // 初始化字段显示
+}
+
+// 关闭弹窗
+function closePrizeModal() {
+  document.getElementById('prizeModal').style.display = 'none';
+}
+
+// 根据奖品类型切换显示字段
+function togglePrizeFields() {
+  const type = document.getElementById('prizeType').value;
+  
+  document.getElementById('physicalFields').classList.toggle('hidden', type !== 'physical');
+  document.getElementById('pointsFields').classList.toggle('hidden', type !== 'points');
+  document.getElementById('couponFields').classList.toggle('hidden', type !== 'coupon');
+  
+  // 模拟实物ID查询预览
+  if (type === 'physical') {
+    const id = document.getElementById('physicalId').value;
+    if (id === 'P1001') {
+      document.getElementById('physicalPreview').style.display = 'block';
+    } else {
+      document.getElementById('physicalPreview').style.display = 'none';
+    }
+  }
+}
+
+// 保存奖品到列表（前端模拟）
+function savePrize() {
+  const level = document.getElementById('prizeLevel').value || '未知奖级';
+  const type = document.getElementById('prizeType').value;
+  let name = '';
+  
+  if (type === 'physical') {
+    name = '实物奖（ID: ' + document.getElementById('physicalId').value + '）';
+  } else if (type === 'points') {
+    name = document.getElementById('pointsAmount').value + '积分';
+  } else if (type === 'coupon') {
+    name = '优惠券：' + document.getElementById('couponCode').value;
+  }
+  
+  const quantity = document.getElementById('prizeQuantity').value;
+  const weight = document.getElementById('prizeWeight').value;
+  
+  const list = document.getElementById('prizeList');
+  const newPrize = document.createElement('div');
+  newPrize.className = 'prize';
+  newPrize.innerHTML = `
+    <div>${level}：${name} × ${quantity}（权重：${weight}）</div>
+    <button class="btn-danger" onclick="this.parentNode.remove()">删除</button>
+  `;
+  list.appendChild(newPrize);
+  
+  closePrizeModal();
+  alert('奖品已添加至列表（模拟保存）');
+}
 </script>
 </body>
 </html>
