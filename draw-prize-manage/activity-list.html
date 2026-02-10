@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>活动管理 - 统开奖平台</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { margin:0; font-family:system-ui,sans-serif; background:#f0f2f5; min-height:100vh; }
+    .main { margin-left:240px; padding:20px; }
+    table { width:100%; background:#fff; border-collapse:collapse; margin-top:20px; }
+    th, td { padding:12px; border-bottom:1px solid #ddd; text-align:left; }
+    th { background:#fafafa; }
+    .btn { padding:8px 16px; background:#1890ff; color:#fff; border:none; border-radius:4px; cursor:pointer; }
+  </style>
+</head>
+<body>
+
+<!-- 左侧固定菜单 -->
+<div style="width:240px;background:#001529;color:#fff;height:100vh;position:fixed;top:0;left:0;overflow-y:auto;box-shadow:2px 0 8px rgba(0,0,0,0.3)">
+  <div style="padding:20px;font-size:22px;font-weight:bold;border-bottom:1px solid #0f2a47">统开奖平台</div>
+  <ul style="list-style:none;margin:16px 0;padding:0">
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='dashboard.html'">仪表盘</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='activity-list.html'">活动管理</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='prize-manage.html'">奖品管理</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='entry-list.html'">参与记录</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='draw-manage.html'">开奖管理</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='winner-intervene.html'">中奖干预</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='statistics.html'">数据统计</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s;margin-top:40px" onclick="if(confirm('确定退出？'))location.href='dashboard.html'">退出登录</li>
+  </ul>
+</div>
+
+<!-- 主内容 -->
+<div class="main">
+  <h1>活动管理</h1>
+  <button class="btn" onclick="alert('打开新建活动弹窗')">+ 新建活动</button>
+  <table>
+    <thead><tr><th>ID</th><th>活动名称</th><th>时间</th><th>参与人数</th><th>状态</th><th>操作</th></tr></thead>
+    <tbody>
+      <tr><td>1001</td><td>2026双11福利大抽奖</td><td>02-01~02-28</td><td>12,345</td><td>进行中</td><td><button class="btn" style="background:#52c41a">编辑</button></td></tr>
+      <tr><td>1002</td><td>春节集卡活动</td><td>01-15~01-29</td><td>28,910</td><td>已结束</td><td><button class="btn" style="background:#faad14">查看</button></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+// 高亮当前页面菜单项 + 悬停效果
+const currentPath = window.location.pathname.split('/').pop() || 'dashboard.html';
+document.querySelectorAll('li').forEach(li => {
+  const target = li.getAttribute('onclick')?.match(/'([^']+\.html)'/)?.[1];
+  if (target === currentPath) {
+    li.style.background = '#1890ff';
+    li.style.fontWeight = 'bold';
+  }
+  li.addEventListener('mouseover', () => {
+    if (!li.style.background.includes('#1890ff')) li.style.background = '#0f2a47';
+  });
+  li.addEventListener('mouseout', () => {
+    if (!li.style.background.includes('#1890ff')) li.style.background = '';
+  });
+});
+</script>
+</body>
+</html>

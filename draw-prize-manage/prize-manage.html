@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>奖品管理 - 统开奖平台</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { margin:0; font-family:system-ui,sans-serif; background:#f0f2f5; min-height:100vh; }
+    .main { margin-left:240px; padding:20px; }
+    .prize { background:#fff; padding:16px; margin:16px 0; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1); display:flex; justify-content:space-between; align-items:center; }
+    .btn { padding:8px 16px; background:#1890ff; color:#fff; border:none; border-radius:4px; cursor:pointer; }
+    .btn-danger { background:#f5222d; }
+  </style>
+</head>
+<body>
+
+<!-- 左侧固定菜单 -->
+<div style="width:240px;background:#001529;color:#fff;height:100vh;position:fixed;top:0;left:0;overflow-y:auto;box-shadow:2px 0 8px rgba(0,0,0,0.3)">
+  <div style="padding:20px;font-size:22px;font-weight:bold;border-bottom:1px solid #0f2a47">统开奖平台</div>
+  <ul style="list-style:none;margin:16px 0;padding:0">
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='dashboard.html'">仪表盘</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='activity-list.html'">活动管理</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='prize-manage.html'">奖品管理</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='entry-list.html'">参与记录</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='draw-manage.html'">开奖管理</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='winner-intervene.html'">中奖干预</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='statistics.html'">数据统计</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s;margin-top:40px" onclick="if(confirm('确定退出？'))location.href='dashboard.html'">退出登录</li>
+  </ul>
+</div>
+
+<!-- 主内容 -->
+<div class="main">
+  <h1>奖品管理</h1>
+  <h3>当前活动奖品（支持拖拽排序）</h3>
+
+  <div class="prize">
+    <div>一等奖：iPhone 16 Pro 256GB × 5</div>
+    <button class="btn-danger" onclick="this.parentNode.remove()">删除</button>
+  </div>
+
+  <div class="prize">
+    <div>二等奖：AirPods Pro 2 × 20</div>
+    <button class="btn-danger" onclick="this.parentNode.remove()">删除</button>
+  </div>
+
+  <div class="prize">
+    <div>三等奖：88元无门槛红包 × 200</div>
+    <button class="btn-danger" onclick="this.parentNode.remove()">删除</button>
+  </div>
+
+  <div class="prize">
+    <div>参与奖：谢谢参与（不限数量）</div>
+    <span style="color:#999">不可删除</span>
+  </div>
+
+  <button class="btn" onclick="alert('已添加新奖品（模拟）')">+ 添加奖品</button>
+</div>
+
+<script>
+// 高亮当前页面菜单项 + 悬停效果
+const currentPath = window.location.pathname.split('/').pop() || 'dashboard.html';
+document.querySelectorAll('li').forEach(li => {
+  const target = li.getAttribute('onclick')?.match(/'([^']+\.html)'/)?.[1];
+  if (target === currentPath) {
+    li.style.background = '#1890ff';
+    li.style.fontWeight = 'bold';
+  }
+  li.addEventListener('mouseover', () => {
+    if (!li.style.background.includes('#1890ff')) li.style.background = '#0f2a47';
+  });
+  li.addEventListener('mouseout', () => {
+    if (!li.style.background.includes('#1890ff')) li.style.background = '';
+  });
+});
+</script>
+</body>
+</html>

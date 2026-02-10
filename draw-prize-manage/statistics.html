@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>数据统计 - 统开奖平台</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    body { margin:0; font-family:system-ui,sans-serif; background:#f0f2f5; min-height:100vh; }
+    .main { margin-left:240px; padding:20px; }
+    .card { background:#fff; border-radius:8px; padding:24px; margin-bottom:24px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+
+<!-- 左侧固定菜单 -->
+<div style="width:240px;background:#001529;color:#fff;height:100vh;position:fixed;top:0;left:0;overflow-y:auto;box-shadow:2px 0 8px rgba(0,0,0,0.3)">
+  <div style="padding:20px;font-size:22px;font-weight:bold;border-bottom:1px solid #0f2a47">统开奖平台</div>
+  <ul style="list-style:none;margin:16px 0;padding:0">
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='dashboard.html'">仪表盘</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='activity-list.html'">活动管理</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='prize-manage.html'">奖品管理</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='entry-list.html'">参与记录</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='draw-manage.html'">开奖管理</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='winner-intervene.html'">中奖干预</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='statistics.html'">数据统计</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s;margin-top:40px" onclick="if(confirm('确定退出？'))location.href='dashboard.html'">退出登录</li>
+  </ul>
+</div>
+
+<!-- 主内容 -->
+<div class="main">
+  <h1>数据统计</h1>
+
+  <div class="card">
+    <h2>奖品发放统计</h2>
+    <canvas id="statChart" height="140"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>参与趋势（近7天）</h2>
+    <canvas id="trendChart" height="140"></canvas>
+  </div>
+</div>
+
+<script>
+// 高亮当前页面菜单项 + 悬停效果
+const currentPath = window.location.pathname.split('/').pop() || 'dashboard.html';
+document.querySelectorAll('li').forEach(li => {
+  const target = li.getAttribute('onclick')?.match(/'([^']+\.html)'/)?.[1];
+  if (target === currentPath) {
+    li.style.background = '#1890ff';
+    li.style.fontWeight = 'bold';
+  }
+  li.addEventListener('mouseover', () => {
+    if (!li.style.background.includes('#1890ff')) li.style.background = '#0f2a47';
+  });
+  li.addEventListener('mouseout', () => {
+    if (!li.style.background.includes('#1890ff')) li.style.background = '';
+  });
+});
+
+// 图表
+new Chart(document.getElementById('statChart'), {
+  type: 'bar',
+  data: {
+    labels: ['一等奖','二等奖','三等奖','谢谢参与'],
+    datasets: [{label:'发放数量',data:[5,20,100,45600],backgroundColor:['#ff4d4f','#faad14','#52c41a','#999']}]
+  },
+  options: {scales: {y: {beginAtZero: true}}}
+});
+
+new Chart(document.getElementById('trendChart'), {
+  type: 'line',
+  data: {
+    labels: ['2/3','2/4','2/5','2/6','2/7','2/8','2/9'],
+    datasets: [{label:'参与人数',data:[3200,4800,6500,8900,12400,15600,18900],borderColor:'#1890ff',tension:0.4,fill:false}]
+  },
+  options: {scales: {y: {beginAtZero: true}}}
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>参与记录 - 统开奖平台</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { margin:0; font-family:system-ui,sans-serif; background:#f0f2f5; min-height:100vh; }
+    .main { margin-left:240px; padding:20px; }
+    table { width:100%; background:#fff; border-collapse:collapse; margin-top:20px; }
+    th, td { padding:12px; border-bottom:1px solid #ddd; text-align:left; }
+    th { background:#fafafa; }
+  </style>
+</head>
+<body>
+
+<!-- 左侧固定菜单 -->
+<div style="width:240px;background:#001529;color:#fff;height:100vh;position:fixed;top:0;left:0;overflow-y:auto;box-shadow:2px 0 8px rgba(0,0,0,0.3)">
+  <div style="padding:20px;font-size:22px;font-weight:bold;border-bottom:1px solid #0f2a47">统开奖平台</div>
+  <ul style="list-style:none;margin:16px 0;padding:0">
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='dashboard.html'">仪表盘</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='activity-list.html'">活动管理</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='prize-manage.html'">奖品管理</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='entry-list.html'">参与记录</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='draw-manage.html'">开奖管理</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='winner-intervene.html'">中奖干预</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='statistics.html'">数据统计</li>
+    <li style="padding:14px 24px;cursor:pointer;transition:0.3s;margin-top:40px" onclick="if(confirm('确定退出？'))location.href='dashboard.html'">退出登录</li>
+  </ul>
+</div>
+
+<!-- 主内容 -->
+<div class="main">
+  <h1>参与记录</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>用户ID</th>
+        <th>抽奖码</th>
+        <th>获得时间</th>
+        <th>获取方式</th>
+        <th>状态</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>u12345</td>
+        <td>628413</td>
+        <td>2026-02-03 19:45</td>
+        <td>分享朋友圈</td>
+        <td>待开奖</td>
+      </tr>
+      <tr>
+        <td>u67890</td>
+        <td>749102</td>
+        <td>2026-02-03 20:10</td>
+        <td>每日签到</td>
+        <td>待开奖</td>
+      </tr>
+      <tr>
+        <td>u54321</td>
+        <td>315794</td>
+        <td>2026-02-04 09:15</td>
+        <td>邀请好友</td>
+        <td>待开奖</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+// 高亮当前页面菜单项 + 悬停效果
+const currentPath = window.location.pathname.split('/').pop() || 'dashboard.html';
+document.querySelectorAll('li').forEach(li => {
+  const target = li.getAttribute('onclick')?.match(/'([^']+\.html)'/)?.[1];
+  if (target === currentPath) {
+    li.style.background = '#1890ff';
+    li.style.fontWeight = 'bold';
+  }
+  li.addEventListener('mouseover', () => {
+    if (!li.style.background.includes('#1890ff')) li.style.background = '#0f2a47';
+  });
+  li.addEventListener('mouseout', () => {
+    if (!li.style.background.includes('#1890ff')) li.style.background = '';
+  });
+});
+</script>
+</body>
+</html>
