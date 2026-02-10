@@ -2,14 +2,19 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>奖品管理 - 统开奖平台</title>
+  <title>开奖管理 - 统开奖平台</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { margin:0; font-family:system-ui,sans-serif; background:#f0f2f5; min-height:100vh; }
     .main { margin-left:240px; padding:20px; }
-    .prize { background:#fff; padding:16px; margin:16px 0; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1); display:flex; justify-content:space-between; align-items:center; }
-    .btn { padding:8px 16px; background:#1890ff; color:#fff; border:none; border-radius:4px; cursor:pointer; }
+    .card { background:#fff; border-radius:8px; padding:24px; margin-bottom:24px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+    label { display:block; margin:16px 0 8px; font-weight:600; }
+    input, select { width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; }
+    .range-container { display:flex; align-items:center; gap:12px; }
+    .btn { padding:10px 24px; border:none; border-radius:4px; color:#fff; cursor:pointer; font-size:16px; margin:12px 0; width:100%; }
+    .btn-primary { background:#1890ff; }
     .btn-danger { background:#f5222d; }
+    .log { background:#f6ffed; padding:16px; border-radius:8px; margin-top:20px; display:none; }
   </style>
 </head>
 <body>
@@ -31,33 +36,70 @@
 
 <!-- 主内容 -->
 <div class="main">
-  <h1>奖品管理</h1>
-  <h3>当前活动奖品（支持拖拽排序）</h3>
+  <h1>开奖管理</h1>
 
-  <div class="prize">
-    <div>一等奖：iPhone 16 Pro 256GB × 5</div>
-    <button class="btn-danger" onclick="this.parentNode.remove()">删除</button>
+  <div class="card">
+    <h2>当前活动：2026双11福利大抽奖</h2>
+    <p>活动时间：2026-02-01 00:00 ~ 2026-02-28 23:59</p>
+    <p>当前参与人数：<strong id="totalEntry">45672</strong> 人</p>
   </div>
 
-  <div class="prize">
-    <div>二等奖：AirPods Pro 2 × 20</div>
-    <button class="btn-danger" onclick="this.parentNode.remove()">删除</button>
+  <div class="card">
+    <h3>开奖设置</h3>
+    <label>开奖时间</label>
+    <input type="datetime-local" id="drawTime" value="2026-03-05T20:00">
+
+    <label>整体中奖概率（人工干预）</label>
+    <div class="range-container">
+      <input type="range" min="0" max="100" value="100" id="winRate" style="flex:1" oninput="updateRate()">
+      <strong id="rateText">100%</strong>
+    </div>
+    <p>预计中奖人数：<strong id="expectWin">45672</strong> 人</p>
+
+    <label>是否允许一人多中</label>
+    <select id="multiWin">
+      <option value="1">允许（高奖级优先一人多中）</option>
+      <option value="0">不允许（一人最多中一个奖）</option>
+    </select>
+
+    <button class="btn btn-primary" onclick="simulateDraw()">开奖前模拟（不锁定）</button>
+    <button class="btn btn-danger" onclick="startRealDraw()">一键正式开奖（锁定数据）</button>
   </div>
 
-  <div class="prize">
-    <div>三等奖：88元无门槛红包 × 200</div>
-    <button class="btn-danger" onclick="this.parentNode.remove()">删除</button>
+  <div class="card log" id="drawLog">
+    <h3>开奖日志</h3>
+    <p id="logContent">暂无日志</p>
   </div>
-
-  <div class="prize">
-    <div>参与奖：谢谢参与（不限数量）</div>
-    <span style="color:#999">不可删除</span>
-  </div>
-
-  <button class="btn" onclick="alert('已添加新奖品（模拟）')">+ 添加奖品</button>
 </div>
 
 <script>
+function updateRate() {
+  const rate = document.getElementById('winRate').value;
+  const total = parseInt(document.getElementById('totalEntry').innerText);
+  document.getElementById('rateText').innerText = rate + '%';
+  document.getElementById('expectWin').innerText = Math.round(total * rate / 100);
+}
+
+function simulateDraw() {
+  alert('模拟开奖完成（不影响真实数据）\n预计中奖人数：' + document.getElementById('expectWin').innerText);
+}
+
+function startRealDraw() {
+  const rate = document.getElementById('winRate').value;
+  const log = document.getElementById('drawLog');
+  const content = document.getElementById('logContent');
+  content.innerHTML = `
+    开奖成功！<br>
+    时间：${new Date().toLocaleString('zh-CN')}<br>
+    使用概率：${rate}%<br>
+    随机种子：0xA1B2C3D4<br>
+    实际中奖人数：${document.getElementById('expectWin').innerText} 人<br>
+    奖品库存已锁定，不可回滚
+  `;
+  log.style.display = 'block';
+  alert('正式开奖已触发！数据已锁定。');
+}
+
 // 高亮当前页面菜单项 + 悬停效果
 const currentPath = window.location.pathname.split('/').pop() || 'dashboard.html';
 document.querySelectorAll('li').forEach(li => {
