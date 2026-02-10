@@ -11,7 +11,7 @@
     label { display:block; margin:16px 0 8px; font-weight:600; color:#333; }
     input, textarea, select { width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-size:14px; }
     input:focus, textarea:focus, select:focus { border-color:#1890ff; outline:none; box-shadow:0 0 0 2px rgba(24,144,255,0.2); }
-    .form-row { display:flex; gap:20px; align-items:flex-start; }
+    .form-row { display:flex; gap:20px; margin-bottom:16px; align-items:flex-start; flex-wrap:wrap; }
     .form-row label { flex:0 0 160px; text-align:right; padding-top:10px; }
     .form-row .control { flex:1; }
     .btn { padding:10px 24px; border:none; border-radius:4px; color:#fff; cursor:pointer; font-size:16px; margin-right:12px; }
@@ -19,8 +19,14 @@
     .btn-success { background:#52c41a; }
     .btn-danger { background:#f5222d; }
     .prize-row { background:#f9f9f9; padding:16px; margin:12px 0; border-radius:8px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
-    .prize-row input { flex:1; min-width:120px; }
+    .prize-row input, .prize-row select { flex:1; min-width:120px; }
     .prize-row .btn-danger { flex:0 0 auto; }
+
+    /* 弹窗样式 */
+    .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:1000; }
+    .modal-content { background:#fff; width:90%; max-width:600px; border-radius:12px; padding:32px; box-shadow:0 10px 30px rgba(0,0,0,0.2); }
+    .hidden { display:none !important; }
+    .prize-preview { margin-top:12px; padding:12px; background:#f0f5ff; border-radius:6px; font-size:14px; }
   </style>
 </head>
 <body>
@@ -30,7 +36,7 @@
   <div style="padding:20px;font-size:22px;font-weight:bold;border-bottom:1px solid #0f2a47">统开奖平台</div>
   <ul style="list-style:none;margin:16px 0;padding:0">
     <li data-page="dashboard.html" style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='dashboard.html'">仪表盘</li>
-    <li data-page="activity-list.html" style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='activity-list.html'">活动管理</li>
+    <li data-page="activity-list.html" style="padding:14px 24px;cursor:pointer;transition:0.3s;background:#1890ff;font-weight:bold" onclick="location.href='activity-list.html'">活动管理</li>
     <li data-page="prize-manage.html" style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='prize-manage.html'">奖品管理</li>
     <li data-page="entry-list.html" style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='entry-list.html'">参与记录</li>
     <li data-page="draw-manage.html" style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='draw-manage.html'">开奖管理</li>
@@ -133,100 +139,4 @@
     <div class="form-row">
       <label>活动规则说明</label>
       <div class="control">
-        <textarea rows="6">1. 参与方式：关注公众号 + 转发朋友圈 + 邀请好友得抽奖码<br>2. 每人每天最多参与3次<br>3. 开奖时间统一进行，随机匹配奖品<br>4. 最终解释权归主办方所有</textarea>
-      </div>
-    </div>
-  </div>
-
-  <!-- 奖品配置 -->
-  <div class="card">
-    <h2>奖品配置</h2>
-    <p style="color:#888;margin-bottom:16px">权重越高，中奖概率越高；总权重系统自动归一化计算</p>
-
-    <div id="prizeContainer">
-      <div class="prize-row">
-        <input type="text" value="一等奖" placeholder="奖级" style="flex:0 0 120px;">
-        <input type="text" value="iPhone 16 Pro 256GB" placeholder="奖品名称">
-        <input type="number" value="5" min="1" placeholder="数量" style="flex:0 0 120px;">
-        <input type="number" value="10" min="1" placeholder="权重" style="flex:0 0 120px;">
-        <button class="btn-danger" onclick="this.parentNode.remove()">删除</button>
-      </div>
-
-      <div class="prize-row">
-        <input type="text" value="二等奖" placeholder="奖级" style="flex:0 0 120px;">
-        <input type="text" value="AirPods Pro 2" placeholder="奖品名称">
-        <input type="number" value="20" min="1" placeholder="数量" style="flex:0 0 120px;">
-        <input type="number" value="30" min="1" placeholder="权重" style="flex:0 0 120px;">
-        <button class="btn-danger" onclick="this.parentNode.remove()">删除</button>
-      </div>
-
-      <div class="prize-row">
-        <input type="text" value="三等奖" placeholder="奖级" style="flex:0 0 120px;">
-        <input type="text" value="88元无门槛红包" placeholder="奖品名称">
-        <input type="number" value="200" min="1" placeholder="数量" style="flex:0 0 120px;">
-        <input type="number" value="60" min="1" placeholder="权重" style="flex:0 0 120px;">
-        <button class="btn-danger" onclick="this.parentNode.remove()">删除</button>
-      </div>
-
-      <div class="prize-row" style="background:#e6f7ff;">
-        <input type="text" value="参与奖" placeholder="奖级" style="flex:0 0 120px;" disabled>
-        <input type="text" value="谢谢参与" placeholder="奖品名称" disabled>
-        <input type="text" value="不限" placeholder="数量" disabled style="flex:0 0 120px;">
-        <input type="text" value="—" placeholder="权重" disabled style="flex:0 0 120px;">
-        <span style="color:#999">固定兜底奖品</span>
-      </div>
-    </div>
-
-    <button class="btn" style="background:#0081f8;margin-top:16px" onclick="addPrizeRow()">+ 添加奖品</button>
-  </div>
-
-  <!-- 操作按钮 -->
-  <div style="text-align:right;margin-top:32px;">
-    <button class="btn" style="background:#999;color:#fff" onclick="if(confirm('取消编辑？未保存内容将丢失')) history.back()">取消</button>
-    <button class="btn btn-success" onclick="alert('活动信息已保存（模拟）')">保存草稿</button>
-    <button class="btn btn-primary" onclick="alert('活动已发布，状态变更为进行中（模拟）')">保存并发布</button>
-  </div>
-</div>
-
-<script>
-// 高亮当前页面菜单项 + 悬停效果
-const currentPath = window.location.pathname.split('/').pop() || 'dashboard.html';
-document.querySelectorAll('li').forEach(li => {
-  const target = li.dataset.page;
-  if (target === currentPath) {
-    li.style.background = '#1890ff';
-    li.style.fontWeight = 'bold';
-  }
-  li.addEventListener('mouseover', () => {
-    if (!li.style.background.includes('#1890ff')) li.style.background = '#0f2a47';
-  });
-  li.addEventListener('mouseout', () => {
-    if (!li.style.background.includes('#1890ff')) li.style.background = '';
-  });
-});
-
-// 实时更新预计中奖人数
-function updateRate() {
-  const rate = document.getElementById('winRate').value;
-  const total = 45672; // 模拟当前参与人数，可从后端获取
-  document.getElementById('rateText').innerText = rate + '%';
-  document.getElementById('expectWin').innerText = Math.round(total * rate / 100);
-}
-
-// 添加奖品行
-function addPrizeRow() {
-  const container = document.getElementById('prizeContainer');
-  const newRow = document.createElement('div');
-  newRow.className = 'prize-row';
-  newRow.innerHTML = `
-    <input type="text" placeholder="奖级" style="flex:0 0 120px;">
-    <input type="text" placeholder="奖品名称">
-    <input type="number" min="1" placeholder="数量" style="flex:0 0 120px;">
-    <input type="number" min="1" placeholder="权重" style="flex:0 0 120px;">
-    <button class="btn-danger" onclick="this.parentNode.remove()">删除</button>
-  `;
-  container.insertBefore(newRow, container.lastElementChild);
-}
-</script>
-</body>
-</html>
+        <textarea rows="6">1. 参与方式：关注公众号 + 转发朋友圈 + 邀请好友得抽奖码<br>2. 每人每天最多参与3次<br>3. 开奖时间统一进行，随机匹配奖品<br>4. 
