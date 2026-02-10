@@ -5,22 +5,30 @@
   <title>活动详情 - 统开奖平台</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { margin:0; font-family:system-ui,sans-serif; background:#f0f2f5; min-height:100vh; }
+    body { margin:0; font-family:system-ui, sans-serif; background:#f0f2f5; min-height:100vh; }
     .main { margin-left:240px; padding:20px; }
     .card { background:#fff; border-radius:8px; padding:24px; margin-bottom:24px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
     label { display:block; margin:16px 0 8px; font-weight:600; color:#333; }
     input, textarea, select { width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-size:14px; }
-    input:focus, textarea:focus, select:focus { border-color:#1890ff; outline:none; box-shadow:0 0 0 2px rgba(24,144,255,0.2); }
-    .form-row { display:flex; gap:20px; align-items:flex-start; }
+    input:focus, textarea:focus, select:focus { border-color:#0081f8; outline:none; box-shadow:0 0 0 2px rgba(0,129,248,0.2); }
+    .form-row { display:flex; gap:20px; margin-bottom:16px; align-items:flex-start; flex-wrap:wrap; }
     .form-row label { flex:0 0 160px; text-align:right; padding-top:10px; }
     .form-row .control { flex:1; }
     .btn { padding:10px 24px; border:none; border-radius:4px; color:#fff; cursor:pointer; font-size:16px; margin-right:12px; }
-    .btn-primary { background:#1890ff; }
+    .btn-primary { background:#0081f8; }
     .btn-success { background:#52c41a; }
     .btn-danger { background:#f5222d; }
-    .prize-row { background:#f9f9f9; padding:16px; margin:12px 0; border-radius:8px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
-    .prize-row input { flex:1; min-width:120px; }
-    .prize-row .btn-danger { flex:0 0 auto; }
+    .btn-add { background:#0081f8; }
+    .prize-row, .task-row { background:#f9f9f9; padding:16px; margin:12px 0; border-radius:8px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    .prize-row input, .task-row input, .task-row select { flex:1; min-width:120px; }
+    .prize-row .btn-danger, .task-row .btn-danger { flex:0 0 auto; }
+    .section-hidden { display:none; }
+    .task-config { margin-top:16px; padding:16px; background:#f0f8ff; border-radius:8px; }
+    .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:1000; }
+    .modal-content { background:#fff; width:90%; max-width:600px; border-radius:12px; padding:32px; box-shadow:0 10px 30px rgba(0,0,0,0.2); }
+    .hidden { display:none !important; }
+    .prize-preview { margin-top:12px; padding:12px; background:#f0f5ff; border-radius:6px; font-size:14px; }
+    .thanks-tip { font-size:13px; color:#666; margin-top:8px; font-style:italic; }
   </style>
 </head>
 <body>
@@ -30,7 +38,7 @@
   <div style="padding:20px;font-size:22px;font-weight:bold;border-bottom:1px solid #0f2a47">统开奖平台</div>
   <ul style="list-style:none;margin:16px 0;padding:0">
     <li data-page="dashboard.html" style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='dashboard.html'">仪表盘</li>
-    <li data-page="activity-list.html" style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='activity-list.html'">活动管理</li>
+    <li data-page="activity-list.html" style="padding:14px 24px;cursor:pointer;transition:0.3s;background:#0081f8;font-weight:bold" onclick="location.href='activity-list.html'">活动管理</li>
     <li data-page="prize-manage.html" style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='prize-manage.html'">奖品管理</li>
     <li data-page="entry-list.html" style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='entry-list.html'">参与记录</li>
     <li data-page="draw-manage.html" style="padding:14px 24px;cursor:pointer;transition:0.3s" onclick="location.href='draw-manage.html'">开奖管理</li>
@@ -88,12 +96,42 @@
     <div class="form-row">
       <label>每人参与次数限制</label>
       <div class="control">
-        <select>
+        <select id="entryLimitType" onchange="toggleTaskConfig()">
           <option>每天1次（推荐）</option>
           <option>活动期间总共1次</option>
-          <option>无限制</option>
-          <option>自定义次数</option>
+          <option>无限制（可配置任务获取次数）</option>
+          <option>自定义次数（需配置任务）</option>
         </select>
+      </div>
+    </div>
+
+    <!-- 参与任务配置 -->
+    <div id="taskConfigSection" class="section-hidden">
+      <div class="card" style="margin-top:16px">
+        <h3>参与任务配置（获取抽奖次数）</h3>
+        <p style="color:#666;margin-bottom:16px">用户完成以下任务可获得额外抽奖次数。支持多任务叠加。</p>
+
+        <div id="taskContainer">
+          <!-- 示例任务 -->
+          <div class="task-row">
+            <select style="flex:0 0 180px;" onchange="toggleTaskPoints(this)">
+              <option selected>分享活动页</option>
+              <option>下单购买</option>
+              <option>积分兑换抽奖码</option>
+            </select>
+            <input type="number" value="1" min="1" placeholder="完成1次得" style="flex:0 0 120px;">
+            <span style="white-space:nowrap;">次抽奖机会</span>
+            <input type="number" value="3" min="0" placeholder="每日上限" style="flex:0 0 120px;">
+            <div class="points-config hidden" style="display:flex;align-items:center;gap:8px;flex:1;">
+              <span>消耗</span>
+              <input type="number" min="1" value="100" style="width:100px;" placeholder="积分">
+              <span>积分 → 1次机会</span>
+            </div>
+            <button class="btn-danger" onclick="this.parentNode.remove()">删除任务</button>
+          </div>
+        </div>
+
+        <button class="btn btn-add" style="margin-top:16px" onclick="addTaskRow()">+ 添加任务</button>
       </div>
     </div>
   </div>
@@ -105,7 +143,7 @@
     <div class="form-row">
       <label>默认中奖概率</label>
       <div class="control">
-        <div class="range-container" style="display:flex;align-items:center;gap:12px;">
+        <div style="display:flex;align-items:center;gap:12px;">
           <input type="range" min="0" max="100" value="100" id="winRate" style="flex:1" oninput="updateRate()">
           <strong id="rateText">100%</strong>
         </div>
@@ -116,7 +154,7 @@
     <div class="form-row">
       <label>预计中奖人数</label>
       <div class="control">
-        <strong id="expectWin">45672</strong> 人（基于当前参与人数 45672）
+        <strong id="expectWin">45672</strong> 人
       </div>
     </div>
 
@@ -138,10 +176,10 @@
     </div>
   </div>
 
- <!-- 奖品配置 -->
+  <!-- 奖品配置 -->
   <div class="card">
     <h2>奖品配置</h2>
-    <p style="color:#888;margin-bottom:16px">权重越高，中奖概率越高；总权重系统自动归一化计算。谢谢参与为固定兜底奖品。</p>
+    <p style="color:#888;margin-bottom:16px">权重越高，中奖概率越高；谢谢参与为固定兜底奖品。</p>
 
     <div id="prizeContainer">
       <div class="prize-row">
@@ -149,14 +187,6 @@
         <input type="text" value="iPhone 16 Pro 256GB" readonly>
         <input type="number" value="5" min="1" style="flex:0 0 120px;" readonly>
         <input type="number" value="10" min="1" style="flex:0 0 120px;" readonly>
-        <button class="btn-danger" onclick="this.parentNode.remove()">删除</button>
-      </div>
-
-      <div class="prize-row">
-        <input type="text" value="二等奖" style="flex:0 0 120px;" readonly>
-        <input type="text" value="5000积分" readonly>
-        <input type="number" value="20" min="1" style="flex:0 0 120px;" readonly>
-        <input type="number" value="30" min="1" style="flex:0 0 120px;" readonly>
         <button class="btn-danger" onclick="this.parentNode.remove()">删除</button>
       </div>
     </div>
@@ -172,7 +202,7 @@
   </div>
 </div>
 
-<!-- 奖品配置弹窗（新增谢谢参与类型） -->
+<!-- 奖品配置弹窗 -->
 <div class="modal" id="prizeModal">
   <div class="modal-content">
     <h2 style="margin-top:0">添加/编辑奖品</h2>
@@ -196,7 +226,7 @@
       </div>
     </div>
 
-    <!-- 实物奖字段 -->
+    <!-- 实物奖 -->
     <div id="physicalFields" class="form-row">
       <label>实物奖品ID</label>
       <div class="control">
@@ -209,7 +239,7 @@
       </div>
     </div>
 
-    <!-- 积分奖字段 -->
+    <!-- 积分奖 -->
     <div id="pointsFields" class="form-row hidden">
       <label>奖励积分数量</label>
       <div class="control">
@@ -217,7 +247,7 @@
       </div>
     </div>
 
-    <!-- 优惠券字段 -->
+    <!-- 优惠券 -->
     <div id="couponFields" class="form-row hidden">
       <label>优惠券码</label>
       <div class="control">
@@ -225,7 +255,7 @@
       </div>
     </div>
 
-    <!-- 谢谢参与固定提示 -->
+    <!-- 谢谢参与 -->
     <div id="thanksFields" class="form-row hidden">
       <label></label>
       <div class="control">
@@ -253,45 +283,148 @@
     </div>
   </div>
 </div>
-  
+
 <script>
 // 高亮当前页面菜单项 + 悬停效果
 const currentPath = window.location.pathname.split('/').pop() || 'dashboard.html';
 document.querySelectorAll('li').forEach(li => {
   const target = li.dataset.page;
   if (target === currentPath) {
-    li.style.background = '#1890ff';
+    li.style.background = '#0081f8';
     li.style.fontWeight = 'bold';
   }
   li.addEventListener('mouseover', () => {
-    if (!li.style.background.includes('#1890ff')) li.style.background = '#0f2a47';
+    if (!li.style.background.includes('#0081f8')) li.style.background = '#0f2a47';
   });
   li.addEventListener('mouseout', () => {
-    if (!li.style.background.includes('#1890ff')) li.style.background = '';
+    if (!li.style.background.includes('#0081f8')) li.style.background = '';
   });
 });
 
 // 实时更新预计中奖人数
 function updateRate() {
   const rate = document.getElementById('winRate').value;
-  const total = 45672; // 模拟当前参与人数，可从后端获取
+  const total = 45672;
   document.getElementById('rateText').innerText = rate + '%';
   document.getElementById('expectWin').innerText = Math.round(total * rate / 100);
 }
 
-// 添加奖品行
-function addPrizeRow() {
-  const container = document.getElementById('prizeContainer');
+// 切换参与次数限制时显示/隐藏任务配置
+function toggleTaskConfig() {
+  const type = document.getElementById('entryLimitType').value;
+  const section = document.getElementById('taskConfigSection');
+  if (type === '无限制（可配置任务获取次数）' || type === '自定义次数（需配置任务）') {
+    section.classList.remove('section-hidden');
+  } else {
+    section.classList.add('section-hidden');
+  }
+}
+
+// 添加任务行
+function addTaskRow() {
+  const container = document.getElementById('taskContainer');
   const newRow = document.createElement('div');
-  newRow.className = 'prize-row';
+  newRow.className = 'task-row';
   newRow.innerHTML = `
-    <input type="text" placeholder="奖级" style="flex:0 0 120px;">
-    <input type="text" placeholder="奖品名称">
-    <input type="number" min="1" placeholder="数量" style="flex:0 0 120px;">
-    <input type="number" min="1" placeholder="权重" style="flex:0 0 120px;">
-    <button class="btn-danger" onclick="this.parentNode.remove()">删除</button>
+    <select style="flex:0 0 180px;" onchange="toggleTaskPoints(this)">
+      <option>分享活动页</option>
+      <option>下单购买</option>
+      <option>积分兑换抽奖码</option>
+    </select>
+    <input type="number" value="1" min="1" placeholder="完成1次得" style="flex:0 0 120px;">
+    <span style="white-space:nowrap;">次抽奖机会</span>
+    <input type="number" value="3" min="0" placeholder="每日上限" style="flex:0 0 120px;">
+    <div class="points-config hidden" style="display:flex;align-items:center;gap:8px;flex:1;">
+      <span>消耗</span>
+      <input type="number" min="1" value="100" style="width:100px;" placeholder="积分">
+      <span>积分 → 1次机会</span>
+    </div>
+    <button class="btn-danger" onclick="this.parentNode.remove()">删除任务</button>
   `;
-  container.insertBefore(newRow, container.lastElementChild);
+  container.appendChild(newRow);
+}
+
+// 切换积分兑换任务的额外字段
+function toggleTaskPoints(select) {
+  const row = select.parentNode;
+  const pointsConfig = row.querySelector('.points-config');
+  if (select.value === '积分兑换抽奖码') {
+    pointsConfig.classList.remove('hidden');
+    pointsConfig.style.display = 'flex';
+  } else {
+    pointsConfig.classList.add('hidden');
+    pointsConfig.style.display = 'none';
+  }
+}
+
+// 打开奖品弹窗
+function openPrizeModal() {
+  document.getElementById('prizeModal').style.display = 'flex';
+  togglePrizeFields();
+}
+
+// 关闭奖品弹窗
+function closePrizeModal() {
+  document.getElementById('prizeModal').style.display = 'none';
+}
+
+// 切换奖品类型字段
+function togglePrizeFields() {
+  const type = document.getElementById('prizeType').value;
+  document.getElementById('physicalFields').classList.toggle('hidden', type !== 'physical');
+  document.getElementById('pointsFields').classList.toggle('hidden', type !== 'points');
+  document.getElementById('couponFields').classList.toggle('hidden', type !== 'coupon');
+  document.getElementById('thanksFields').classList.toggle('hidden', type !== 'thanks');
+  document.getElementById('quantityRow').classList.toggle('hidden', type === 'thanks');
+  document.getElementById('weightRow').classList.toggle('hidden', type === 'thanks');
+  if (type === 'physical') previewPhysical();
+}
+
+// 模拟实物预览
+function previewPhysical() {
+  const id = document.getElementById('physicalId').value.trim();
+  const preview = document.getElementById('physicalPreview');
+  if (id === 'P1001') {
+    document.getElementById('physicalName').innerText = 'iPhone 16 Pro 256GB';
+    document.getElementById('physicalPrice').innerText = '8999';
+    document.getElementById('physicalImg').src = 'https://via.placeholder.com/60x60/ff9800/fff?text=iPhone';
+    preview.style.display = 'block';
+  } else if (id) {
+    document.getElementById('physicalName').innerText = '未知奖品';
+    document.getElementById('physicalPrice').innerText = '0';
+    document.getElementById('physicalImg').src = 'https://via.placeholder.com/60x60/ccc/fff?text=?';
+    preview.style.display = 'block';
+  } else {
+    preview.style.display = 'none';
+  }
+}
+
+// 保存奖品
+function savePrize() {
+  const level = document.getElementById('prizeLevel').value.trim() || '未知奖级';
+  const type = document.getElementById('prizeType').value;
+  let name = '';
+  
+  if (type === 'physical') name = `实物奖（ID: ${document.getElementById('physicalId').value || '未知'}）`;
+  else if (type === 'points') name = `${document.getElementById('pointsAmount').value || 0}积分`;
+  else if (type === 'coupon') name = `优惠券：${document.getElementById('couponCode').value || '未知'}`;
+  else if (type === 'thanks') name = '谢谢参与（兜底）';
+  
+  const quantity = type === 'thanks' ? '不限' : document.getElementById('prizeQuantity').value;
+  const weight = type === 'thanks' ? '—' : document.getElementById('prizeWeight').value;
+  
+  const container = document.getElementById('prizeContainer');
+  const row = document.createElement('div');
+  row.className = `prize-row ${type === 'thanks' ? 'thanks' : ''}`;
+  row.innerHTML = `
+    <input type="text" value="${level}" style="flex:0 0 120px;" readonly>
+    <input type="text" value="${name}" readonly>
+    <input type="text" value="${quantity}" style="flex:0 0 120px;" readonly>
+    <input type="text" value="${weight}" style="flex:0 0 120px;" readonly>
+    <button class="btn-danger" onclick="this.parentNode.remove()" ${type === 'thanks' ? 'disabled' : ''}>删除</button>
+  `;
+  container.appendChild(row);
+  closePrizeModal();
 }
 </script>
 </body>
