@@ -173,75 +173,134 @@
         <textarea rows="6">1. 参与方式：关注公众号 + 转发朋友圈 + 邀请好友得抽奖码<br>2. 每人每天最多参与3次<br>3. 开奖时间统一进行，随机匹配奖品<br>4. 最终解释权归主办方所有</textarea>
       </div>
     </div>
-    <!-- 新增：安慰奖配置 -->
-    <div style="margin-top:32px;padding-top:24px;border-top:1px solid #eee">
-      <h3>安慰奖配置（未中奖用户专属）</h3>
-      <p style="color:#666;margin-bottom:16px">当用户未中任何奖品时，可自动发放安慰奖，提升用户体验和留存率</p>
+   <!-- 安慰奖配置 -->
+<div style="margin-top:32px;padding-top:24px;border-top:1px solid #eee">
+  <h3 style="margin:0 0 16px">安慰奖配置（未中奖用户专属）</h3>
+  <p style="color:#666;margin-bottom:20px;font-size:14px">
+    当用户未中任何奖品时，可自动发放安慰奖，提升用户体验和留存率
+  </p>
 
-      <div class="form-row">
-        <label>是否开启安慰奖</label>
+  <div class="form-row" style="align-items:center">
+    <label style="flex:0 0 160px">开启安慰奖</label>
+    <div class="control" style="display:flex;align-items:center;gap:12px">
+      <input type="checkbox" id="comfortEnable" checked onchange="toggleComfortFields()" style="width:40px;height:20px">
+      <span style="color:#0081f8;font-weight:500" id="comfortStatus">已开启</span>
+    </div>
+  </div>
+
+  <div id="comfortFields" style="margin-top:20px">
+    <!-- 类型选择卡片 -->
+    <div class="form-row" style="flex-direction:column;gap:12px">
+      <label>安慰奖类型</label>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <label class="type-card" style="flex:1;min-width:140px;cursor:pointer">
+          <input type="radio" name="comfortType" value="points" checked onchange="toggleComfortDetail()" style="display:none">
+          <div class="type-content" style="padding:12px;border:2px solid #0081f8;border-radius:8px;text-align:center;background:#e6f7ff">
+            <div style="font-size:20px">💰</div>
+            <div>积分奖励</div>
+          </div>
+        </label>
+
+        <label class="type-card" style="flex:1;min-width:140px;cursor:pointer">
+          <input type="radio" name="comfortType" value="coupon" onchange="toggleComfortDetail()" style="display:none">
+          <div class="type-content" style="padding:12px;border:2px solid #ddd;border-radius:8px;text-align:center">
+            <div style="font-size:20px">🎟️</div>
+            <div>优惠券</div>
+          </div>
+        </label>
+
+        <label class="type-card" style="flex:1;min-width:140px;cursor:pointer">
+          <input type="radio" name="comfortType" value="redpacket" onchange="toggleComfortDetail()" style="display:none">
+          <div class="type-content" style="padding:12px;border:2px solid #ddd;border-radius:8px;text-align:center">
+            <div style="font-size:20px">🧧</div>
+            <div>小额红包</div>
+          </div>
+        </label>
+
+        <label class="type-card" style="flex:1;min-width:140px;cursor:pointer">
+          <input type="radio" name="comfortType" value="text" onchange="toggleComfortDetail()" style="display:none">
+          <div class="type-content" style="padding:12px;border:2px solid #ddd;border-radius:8px;text-align:center">
+            <div style="font-size:20px">📝</div>
+            <div>自定义文案</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- 具体配置 -->
+    <div id="comfortDetail" style="margin-top:20px">
+      <!-- 积分 -->
+      <div id="comfortPoints" class="comfort-row">
+        <label>奖励积分数量</label>
         <div class="control">
-          <input type="checkbox" id="comfortEnable" checked onchange="toggleComfortFields()">
+          <input type="number" min="1" max="10000" value="50" placeholder="建议 10~1000">
+          <div style="font-size:12px;color:#888;margin-top:4px">用户可在积分商城兑换抽奖机会或其他权益</div>
         </div>
       </div>
 
-      <div id="comfortFields">
-        <div class="form-row">
-          <label>安慰奖类型</label>
-          <div class="control">
-            <select id="comfortType" onchange="toggleComfortDetail()">
-              <option value="points">积分奖励</option>
-              <option value="coupon">优惠券</option>
-              <option value="redpacket">小额红包</option>
-              <option value="text">自定义文案（无实际奖励）</option>
-            </select>
-          </div>
+      <!-- 优惠券 -->
+      <div id="comfortCoupon" class="comfort-row hidden">
+        <label>优惠券码</label>
+        <div class="control">
+          <input type="text" value="COMFORT-10" placeholder="系统自动生成或手动填写">
+          <div style="font-size:12px;color:#888;margin-top:4px">支持满减/无门槛，建议与商品活动联动</div>
         </div>
+      </div>
 
-        <!-- 积分奖励 -->
-        <div id="comfortPoints" class="comfort-row">
-          <label>奖励积分数量</label>
-          <input type="number" min="1" value="50" placeholder="如：50积分">
+      <!-- 小额红包 -->
+      <div id="comfortRedpacket" class="comfort-row hidden">
+        <label>红包金额（元）</label>
+        <div class="control">
+          <input type="number" step="0.01" min="0.01" max="10" value="1.88" placeholder="建议 0.1~6.66元">
+          <div style="font-size:12px;color:#888;margin-top:4px">金额过高可能影响成本，建议控制在 2 元以内</div>
         </div>
+      </div>
 
-        <!-- 优惠券 -->
-        <div id="comfortCoupon" class="comfort-row hidden">
-          <label>优惠券码</label>
-          <input type="text" value="COMFORT-10" placeholder="如：COMFORT-10">
+      <!-- 自定义文案 -->
+      <div id="comfortText" class="comfort-row hidden">
+        <label>安慰文案（C端展示）</label>
+        <div class="control">
+          <textarea rows="4" placeholder="很遗憾未中奖～送你一个大大的抱抱！下次一定中！继续参与其他活动吧～">很遗憾未中奖～送你一个大大的抱抱！下次一定中！继续参与其他活动吧～</textarea>
         </div>
+      </div>
 
-        <!-- 小额红包 -->
-        <div id="comfortRedpacket" class="comfort-row hidden">
-          <label>红包金额（元）</label>
-          <input type="number" step="0.01" min="0.01" value="1.88" placeholder="如：1.88元">
+      <!-- 发放条件 -->
+      <div class="form-row">
+        <label>发放条件</label>
+        <div class="control">
+          <select>
+            <option selected>所有未中奖用户</option>
+            <option>随机 30%~70% 未中奖用户</option>
+            <option>仅首次参与未中奖用户</option>
+            <option>连续3次未中奖用户</option>
+          </select>
         </div>
+      </div>
 
-        <!-- 自定义文案 -->
-        <div id="comfortText" class="comfort-row hidden">
-          <label>安慰文案</label>
-          <textarea rows="3">很遗憾未中奖～送你一个大大的抱抱！下次一定中！继续参与其他活动吧～</textarea>
+      <div class="form-row">
+        <label>每用户每日上限</label>
+        <div class="control">
+          <input type="number" min="0" value="1" placeholder="0 = 不限">
+          <div style="font-size:12px;color:#888;margin-top:4px">防止重复领取，建议设为 1</div>
         </div>
+      </div>
+    </div>
 
-        <div class="form-row">
-          <label>发放条件</label>
-          <div class="control">
-            <select>
-              <option selected>所有未中奖用户</option>
-              <option>随机 50% 未中奖用户</option>
-              <option>仅首次参与未中奖用户</option>
-            </select>
-          </div>
+    <!-- C端预览 -->
+    <div class="card" style="margin-top:24px;background:#f6ffed;border:1px solid #b7eb8f">
+      <h4 style="margin:0 0 12px;color:#52c41a">C端用户端预览（未中奖时展示）</h4>
+      <div style="padding:16px;background:#fff;border-radius:8px;border:1px dashed #52c41a">
+        <div style="font-size:18px;color:#333;text-align:center;margin-bottom:12px">很遗憾，本次未中奖～</div>
+        <div style="color:#52c41a;font-weight:bold;text-align:center">
+          送你 <span id="comfortPreviewValue">50积分</span> 作为安慰！
         </div>
-
-        <div class="form-row">
-          <label>每日发放上限（每用户）</label>
-          <div class="control">
-            <input type="number" min="0" value="1" placeholder="0 = 不限">
-          </div>
+        <div style="font-size:13px;color:#888;text-align:center;margin-top:8px">
+          积分已到账，可在积分商城兑换抽奖机会或其他好礼
         </div>
       </div>
     </div>
   </div>
+</div>
 
   <!-- 奖品配置 -->
   <div class="card">
@@ -371,20 +430,48 @@ document.querySelectorAll('li').forEach(li => {
   });
 });
   
-// 切换安慰奖配置显示
+// 切换安慰奖开关
 function toggleComfortFields() {
   const enable = document.getElementById('comfortEnable').checked;
   document.getElementById('comfortFields').style.display = enable ? 'block' : 'none';
+  document.getElementById('comfortStatus').innerText = enable ? '已开启' : '已关闭';
 }
 
-// 切换安慰奖类型详情
+// 切换安慰奖类型
 function toggleComfortDetail() {
-  const type = document.getElementById('comfortType').value;
+  const type = document.querySelector('input[name="comfortType"]:checked').value;
+  
   document.getElementById('comfortPoints').classList.toggle('hidden', type !== 'points');
   document.getElementById('comfortCoupon').classList.toggle('hidden', type !== 'coupon');
   document.getElementById('comfortRedpacket').classList.toggle('hidden', type !== 'redpacket');
   document.getElementById('comfortText').classList.toggle('hidden', type !== 'text');
+
+  // 更新预览
+  let previewText = '';
+  if (type === 'points') {
+    const val = document.getElementById('comfortPoints').querySelector('input').value;
+    previewText = val + '积分';
+  } else if (type === 'coupon') {
+    const val = document.getElementById('comfortCoupon').querySelector('input').value;
+    previewText = '优惠券：' + (val || '未知');
+  } else if (type === 'redpacket') {
+    const val = document.getElementById('comfortRedpacket').querySelector('input').value;
+    previewText = val + '元红包';
+  } else if (type === 'text') {
+    previewText = '自定义文案';
+  }
+  document.getElementById('comfortPreviewValue').innerText = previewText;
 }
+
+// 监听积分/红包输入变化，实时更新预览
+document.querySelectorAll('#comfortPoints input, #comfortRedpacket input').forEach(input => {
+  input.addEventListener('input', toggleComfortDetail);
+});
+
+// 初始化
+toggleComfortFields();
+toggleComfortDetail();
+  
 // 实时更新预计中奖人数
 function updateRate() {
   const rate = document.getElementById('winRate').value;
