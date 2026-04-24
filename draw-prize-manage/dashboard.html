@@ -9,11 +9,15 @@
     .main { margin-left:240px; padding:20px; }
     .card { background:#fff; border-radius:8px; padding:20px; margin-bottom:20px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
     .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
+    .metric-value { font-size:36px; color:#1890ff; }
+    .metric-warn { color:#faad14; }
+    table { width:100%; border-collapse:collapse; margin-top:12px; }
+    th, td { text-align:left; padding:12px 8px; border-bottom:1px solid #f0f0f0; }
+    th { color:#666; font-weight:600; background:#fafafa; }
   </style>
 </head>
 <body>
 
-<!-- 左侧固定菜单 -->
 <div style="width:240px;background:#001529;color:#fff;height:100vh;position:fixed;top:0;left:0;overflow-y:auto;box-shadow:2px 0 8px rgba(0,0,0,0.3)">
   <div style="padding:20px;font-size:22px;font-weight:bold;border-bottom:1px solid #0f2a47">统开奖平台</div>
   <ul style="list-style:none;margin:16px 0;padding:0">
@@ -28,36 +32,62 @@
   </ul>
 </div>
 
-<!-- 主内容 -->
 <div class="main">
   <h1>仪表盘</h1>
   <div class="card">
     <h2>今日概览</h2>
     <div class="stats">
-      <div class="card"><strong>进行中活动</strong><br><span style="font-size:36px;color:#1890ff">8</span><br><small>↑12% 本周</small></div>
-      <div class="card"><strong>总参与人数</strong><br><span style="font-size:36px;color:#1890ff">45,672</span><br><small>↑18% 本周</small></div>
-      <div class="card"><strong>总抽奖码</strong><br><span style="font-size:36px;color:#1890ff">68,941</span><br><small>↑15% 本周</small></div>
-      <div class="card"><strong>待开奖活动</strong><br><span style="font-size:36px;color:#faad14">3</span></div>
+      <div class="card"><strong>进行中活动</strong><br><span id="activeActivities" class="metric-value">-</span><br><small>系统实时汇总</small></div>
+      <div class="card"><strong>总参与人数</strong><br><span id="totalParticipants" class="metric-value">-</span><br><small>去重用户数</small></div>
+      <div class="card"><strong>总抽奖码</strong><br><span id="totalEntries" class="metric-value">-</span><br><small>累计参与记录</small></div>
+      <div class="card"><strong>待开奖活动</strong><br><span id="pendingDrawActivities" class="metric-value metric-warn">-</span><br><small>可前往开奖管理执行</small></div>
     </div>
+  </div>
+
+  <div class="card">
+    <h2>活动概览</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>活动名称</th>
+          <th>状态</th>
+          <th>参与人数</th>
+          <th>抽奖码</th>
+          <th>已中奖</th>
+        </tr>
+      </thead>
+      <tbody id="activitySummaryBody"></tbody>
+    </table>
   </div>
 </div>
 
+<script src="/assets/app.js"></script>
 <script>
-// 高亮当前页面菜单项 + 悬停效果
-const currentPath = window.location.pathname.split('/').pop() || 'dashboard.html';
-document.querySelectorAll('li').forEach(li => {
-  const target = li.dataset.page;
-  if (target === currentPath) {
-    li.style.background = '#1890ff';
-    li.style.fontWeight = 'bold';
-  }
-  li.addEventListener('mouseover', () => {
-    if (!li.style.background.includes('#1890ff')) li.style.background = '#0f2a47';
-  });
-  li.addEventListener('mouseout', () => {
-    if (!li.style.background.includes('#1890ff')) li.style.background = '';
-  });
-});
+app.initMenuHighlight();
+app.initAdminFloatingNav();
+
+async function loadDashboard() {
+  const data = await app.api.get("/api/dashboard");
+  document.getElementById("activeActivities").textContent = data.activeActivities;
+  document.getElementById("totalParticipants").textContent = data.totalParticipants.toLocaleString("zh-CN");
+  document.getElementById("totalEntries").textContent = data.totalEntries.toLocaleString("zh-CN");
+  document.getElementById("pendingDrawActivities").textContent = data.pendingDrawActivities;
+
+  const tbody = document.getElementById("activitySummaryBody");
+  tbody.innerHTML = data.activities.map((activity) => `
+    <tr>
+      <td>${activity.id}</td>
+      <td>${activity.name}</td>
+      <td>${activity.status}</td>
+      <td>${activity.participantCount.toLocaleString("zh-CN")}</td>
+      <td>${activity.entryCount.toLocaleString("zh-CN")}</td>
+      <td>${activity.winnerCount.toLocaleString("zh-CN")}</td>
+    </tr>
+  `).join("");
+}
+
+loadDashboard().catch((error) => app.showMessage(error.message));
 </script>
 </body>
 </html>

@@ -7,19 +7,16 @@
   <style>
     body { margin:0; font-family:system-ui,sans-serif; background:#f0f2f5; min-height:100vh; }
     .main { margin-left:240px; padding:20px; }
-    .card { background:#fff; border-radius:8px; padding:24px; margin-bottom:24px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
-    label { display:block; margin:16px 0 8px; font-weight:600; }
-    input, select { width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; }
-    .range-container { display:flex; align-items:center; gap:12px; }
-    .btn { padding:10px 24px; border:none; border-radius:4px; color:#fff; cursor:pointer; font-size:16px; margin:12px 0; width:100%; }
-    .btn-primary { background:#1890ff; }
-    .btn-danger { background:#f5222d; }
-    .log { background:#f6ffed; padding:16px; border-radius:8px; margin-top:20px; display:none; }
+    table { width:100%; background:#fff; border-collapse:collapse; margin-top:20px; }
+    th, td { padding:12px; border-bottom:1px solid #ddd; text-align:left; }
+    th { background:#fafafa; }
+    .btn { padding:8px 16px; background:#1890ff; color:#fff; border:none; border-radius:4px; cursor:pointer; }
+    .btn-secondary { background:#52c41a; }
+    .note { color:#666; margin-top:8px; }
   </style>
 </head>
 <body>
 
-<!-- 左侧固定菜单 -->
 <div style="width:240px;background:#001529;color:#fff;height:100vh;position:fixed;top:0;left:0;overflow-y:auto;box-shadow:2px 0 8px rgba(0,0,0,0.3)">
   <div style="padding:20px;font-size:22px;font-weight:bold;border-bottom:1px solid #0f2a47">统开奖平台</div>
   <ul style="list-style:none;margin:16px 0;padding:0">
@@ -34,87 +31,52 @@
   </ul>
 </div>
 
-<!-- 主内容 -->
 <div class="main">
   <h1>开奖管理</h1>
-
-  <div class="card">
-    <h2>当前活动：2026双11福利大抽奖</h2>
-    <p>活动时间：2026-02-01 00:00 ~ 2026-02-28 23:59</p>
-    <p>当前参与人数：<strong id="totalEntry">45672</strong> 人</p>
-  </div>
-
-  <div class="card">
-    <h3>开奖设置</h3>
-    <label>开奖时间</label>
-    <input type="datetime-local" id="drawTime" value="2026-03-05T20:00">
-
-    <label>整体中奖概率（人工干预）</label>
-    <div class="range-container">
-      <input type="range" min="0" max="100" value="100" id="winRate" style="flex:1" oninput="updateRate()">
-      <strong id="rateText">100%</strong>
-    </div>
-    <p>预计中奖人数：<strong id="expectWin">45672</strong> 人</p>
-
-    <label>是否允许一人多中</label>
-    <select id="multiWin">
-      <option value="1">允许（高奖级优先一人多中）</option>
-      <option value="0">不允许（一人最多中一个奖）</option>
-    </select>
-
-    <button class="btn btn-primary" onclick="simulateDraw()">开奖前模拟（不锁定）</button>
-    <button class="btn btn-danger" onclick="startRealDraw()">一键正式开奖（锁定数据）</button>
-  </div>
-
-  <div class="card log" id="drawLog">
-    <h3>开奖日志</h3>
-    <p id="logContent">暂无日志</p>
-  </div>
+  <p class="note">可在此查看各活动开奖状态，并对待开奖活动执行统一开奖。</p>
+  <table>
+    <thead>
+      <tr>
+        <th>活动ID</th>
+        <th>活动名称</th>
+        <th>状态</th>
+        <th>待开奖记录</th>
+        <th>开奖时间</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="drawTableBody"></tbody>
+  </table>
 </div>
 
+<script src="/assets/app.js"></script>
 <script>
-// 高亮当前页面菜单项 + 悬停效果
-const currentPath = window.location.pathname.split('/').pop() || 'dashboard.html';
-document.querySelectorAll('li').forEach(li => {
-  const target = li.dataset.page;
-  if (target === currentPath) {
-    li.style.background = '#1890ff';
-    li.style.fontWeight = 'bold';
-  }
-  li.addEventListener('mouseover', () => {
-    if (!li.style.background.includes('#1890ff')) li.style.background = '#0f2a47';
-  });
-  li.addEventListener('mouseout', () => {
-    if (!li.style.background.includes('#1890ff')) li.style.background = '';
-  });
-});
+app.initMenuHighlight();
+app.initAdminFloatingNav();
 
-function updateRate() {
-  const rate = document.getElementById('winRate').value;
-  const total = parseInt(document.getElementById('totalEntry').innerText);
-  document.getElementById('rateText').innerText = rate + '%';
-  document.getElementById('expectWin').innerText = Math.round(total * rate / 100);
+async function loadDraws() {
+  const list = await app.api.get("/api/draws");
+  document.getElementById("drawTableBody").innerHTML = list.map((item) => `
+    <tr>
+      <td>${item.id}</td>
+      <td>${item.name}</td>
+      <td>${item.status}</td>
+      <td>${item.pendingEntries}</td>
+      <td>${app.formatDateTime(item.drawTime)}</td>
+      <td>
+        ${item.pendingEntries > 0 ? `<button class="btn btn-secondary" onclick="runDraw(${item.id})">立即开奖</button>` : `<span style="color:#999">无需操作</span>`}
+      </td>
+    </tr>
+  `).join("");
 }
 
-function simulateDraw() {
-  alert('模拟开奖完成（不影响真实数据）\n预计中奖人数：' + document.getElementById('expectWin').innerText);
+async function runDraw(activityId) {
+  const result = await app.api.post(`/api/draws/${activityId}/run`, {});
+  await loadDraws();
+  app.showMessage(`开奖完成，共产生 ${result.winners.length} 条中奖记录`);
 }
 
-function startRealDraw() {
-  const rate = document.getElementById('winRate').value;
-  const log = document.getElementById('drawLog');
-  const content = document.getElementById('logContent');
-  content.innerHTML = `
-    开奖成功！<br>
-    时间：${new Date().toLocaleString('zh-CN')}<br>
-    使用概率：${rate}%<br>
-    随机种子：0xA1B2C3D4<br>
-    实际中奖人数：${document.getElementById('expectWin').innerText} 人<br>
-    奖品库存已锁定，不可回滚
-  `;
-  log.style.display = 'block';
-  alert('正式开奖已触发！数据已锁定。');
-}
+loadDraws().catch((error) => app.showMessage(error.message));
 </script>
 </body>
 </html>

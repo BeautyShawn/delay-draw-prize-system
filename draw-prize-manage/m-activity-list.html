@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>我的抽奖活动 - 活动列表</title>
+  <link rel="stylesheet" href="/assets/mobile.css">
+</head>
+<body>
+  <div class="mobile-shell">
+    <div class="page">
+      <section class="hero">
+        <div class="eyebrow">我的抽奖活动</div>
+        <h1>参加过的活动都在这里</h1>
+        <p>按活动查看你的参与状态、抽奖码数量和开奖结果。点击任一活动卡片，即可进入对应详情页继续查看或兑奖。</p>
+        <div class="directory" data-mobile-directory></div>
+      </section>
+
+      <section class="card">
+        <h2 class="section-title">活动总览</h2>
+        <div class="metrics">
+          <div class="metric"><strong>4</strong><span>累计参与活动</span></div>
+          <div class="metric"><strong>8</strong><span>累计抽奖码</span></div>
+          <div class="metric"><strong>2</strong><span>已中奖活动</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <span class="badge">可点击进入详情</span>
+        <h2 class="section-title">我的活动列表</h2>
+        <div class="activity-list">
+          <a class="activity-link" href="/m-activity-pending.html">
+            <div class="activity-card">
+              <div class="activity-card-head">
+                <div>
+                  <span class="status-badge status-pending">待开奖</span>
+                  <h3>2026 双11福利大抽奖</h3>
+                  <div class="subtle">开奖时间：2026-02-28 20:00</div>
+                </div>
+                <div class="badge">进行中</div>
+              </div>
+              <div class="activity-meta">
+                <div class="activity-meta-item"><strong>3</strong><span>我的抽奖码</span></div>
+                <div class="activity-meta-item"><strong>3/100</strong><span>参与进度</span></div>
+                <div class="activity-meta-item"><strong>2026.01.01 10:00</strong><span>即将开奖</span></div>
+              </div>
+            </div>
+          </a>
+
+          <a class="activity-link" href="/m-activity-won.html">
+            <div class="activity-card">
+              <div class="activity-card-head">
+                <div>
+                  <span class="status-badge status-win">已中奖</span>
+                  <h3>春日上新抽奖季</h3>
+                  <div class="subtle">中奖结果：二等奖 AirPods Pro 2</div>
+                </div>
+                <div class="badge">待兑奖</div>
+              </div>
+              <div class="activity-meta">
+                <div class="activity-meta-item"><strong>2</strong><span>参与抽奖码</span></div>
+                <div class="activity-meta-item"><strong>749102</strong><span>中奖号码</span></div>
+                <div class="activity-meta-item"><strong>48h</strong><span>领奖剩余</span></div>
+              </div>
+            </div>
+          </a>
+
+          <a class="activity-link" href="/m-activity-lost.html">
+            <div class="activity-card">
+              <div class="activity-card-head">
+                <div>
+                  <span class="status-badge status-lost">未中奖</span>
+                  <h3>年中会员宠粉夜</h3>
+                  <div class="subtle">本场开奖已结束，安慰券已自动发放。</div>
+                </div>
+                <div class="badge">已结束</div>
+              </div>
+              <div class="activity-meta">
+                <div class="activity-meta-item"><strong>2</strong><span>参与抽奖码</span></div>
+                <div class="activity-meta-item"><strong>5 元券</strong><span>安慰奖励</span></div>
+                <div class="activity-meta-item"><strong>已到账</strong><span>权益状态</span></div>
+              </div>
+            </div>
+          </a>
+
+          <a class="activity-link" href="/m-activity-new.html">
+            <div class="activity-card">
+              <div class="activity-card-head">
+                <div>
+                  <span class="status-badge status-pending">未参与</span>
+                  <h3>周年庆终极大奖场</h3>
+                  <div class="subtle">你已浏览该活动，但还没有获得抽奖码。</div>
+                </div>
+                <div class="badge">可报名</div>
+              </div>
+              <div class="activity-meta">
+                <div class="activity-meta-item"><strong>0</strong><span>我的抽奖码</span></div>
+                <div class="activity-meta-item"><strong>3</strong><span>可做任务</span></div>
+                <div class="activity-meta-item"><strong>明晚</strong><span>开奖时间</span></div>
+              </div>
+            </div>
+          </a>
+        </div>
+      </section>
+    </div>
+  </div>
+  <script src="/assets/mobile.js"></script>
+</body>
+</html>

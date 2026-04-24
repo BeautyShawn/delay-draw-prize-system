@@ -11,11 +11,13 @@
     th, td { padding:12px; border-bottom:1px solid #ddd; text-align:left; }
     th { background:#fafafa; }
     .btn { padding:8px 16px; background:#1890ff; color:#fff; border:none; border-radius:4px; cursor:pointer; }
+    .btn-link { padding:6px 12px; background:#52c41a; color:#fff; border-radius:4px; text-decoration:none; display:inline-block; }
+    .toolbar { display:flex; gap:12px; align-items:center; }
+    .toolbar input { padding:8px 12px; border:1px solid #d9d9d9; border-radius:4px; min-width:220px; }
   </style>
 </head>
 <body>
 
-<!-- 左侧固定菜单 -->
 <div style="width:240px;background:#001529;color:#fff;height:100vh;position:fixed;top:0;left:0;overflow-y:auto;box-shadow:2px 0 8px rgba(0,0,0,0.3)">
   <div style="padding:20px;font-size:22px;font-weight:bold;border-bottom:1px solid #0f2a47">统开奖平台</div>
   <ul style="list-style:none;margin:16px 0;padding:0">
@@ -30,35 +32,56 @@
   </ul>
 </div>
 
-<!-- 主内容 -->
 <div class="main">
   <h1>活动管理</h1>
-  <button class="btn" onclick="location.href='activity-detail.html'">+ 新建活动</button>
+  <div class="toolbar">
+    <button class="btn" onclick="createActivity()">+ 新建活动</button>
+    <input id="activityNameInput" placeholder="输入新活动名称，留空则自动生成">
+  </div>
   <table>
-    <thead><tr><th>ID</th><th>活动名称</th><th>时间</th><th>参与人数</th><th>状态</th><th>操作</th></tr></thead>
-    <tbody>
-      <tr><td>1001</td><td>2026双11福利大抽奖</td><td>02-01~02-28</td><td>12,345</td><td>进行中</td><td><button class="btn" style="background:#52c41a">编辑</button></td></tr>
-      <tr><td>1002</td><td>春节集卡活动</td><td>01-15~01-29</td><td>28,910</td><td>已结束</td><td><button class="btn" style="background:#faad14">查看</button></td></tr>
-    </tbody>
+    <thead><tr><th>ID</th><th>活动名称</th><th>时间</th><th>参与人数</th><th>状态</th><th>开奖时间</th><th>操作</th></tr></thead>
+    <tbody id="activityTableBody"></tbody>
   </table>
 </div>
 
+<script src="/assets/app.js"></script>
 <script>
-// 高亮当前页面菜单项 + 悬停效果
-const currentPath = window.location.pathname.split('/').pop() || 'dashboard.html';
-document.querySelectorAll('li').forEach(li => {
-  const target = li.dataset.page;
-  if (target === currentPath) {
-    li.style.background = '#1890ff';
-    li.style.fontWeight = 'bold';
-  }
-  li.addEventListener('mouseover', () => {
-    if (!li.style.background.includes('#1890ff')) li.style.background = '#0f2a47';
+app.initMenuHighlight();
+app.initAdminFloatingNav();
+
+async function loadActivities() {
+  const activities = await app.api.get("/api/activities");
+  const tbody = document.getElementById("activityTableBody");
+  tbody.innerHTML = activities.map((activity) => `
+    <tr>
+      <td>${activity.id}</td>
+      <td>${activity.name}</td>
+      <td>${app.formatDateTime(activity.startTime).slice(5, 16)} ~ ${app.formatDateTime(activity.endTime).slice(5, 16)}</td>
+      <td>${activity.participantCount.toLocaleString("zh-CN")}</td>
+      <td>${activity.status}</td>
+      <td>${app.formatDateTime(activity.drawTime)}</td>
+      <td><a class="btn-link" href="/activity-edit.html?id=${activity.id}">编辑</a></td>
+    </tr>
+  `).join("");
+}
+
+async function createActivity() {
+  const input = document.getElementById("activityNameInput");
+  const name = input.value.trim() || `新活动${Date.now().toString().slice(-4)}`;
+  await app.api.post("/api/activities", {
+    name,
+    status: "草稿",
+    startTime: "2026-03-01T00:00:00+08:00",
+    endTime: "2026-03-15T23:59:59+08:00",
+    drawTime: "2026-03-15T20:00:00+08:00",
+    tasks: ["分享朋友圈"]
   });
-  li.addEventListener('mouseout', () => {
-    if (!li.style.background.includes('#1890ff')) li.style.background = '';
-  });
-});
+  input.value = "";
+  await loadActivities();
+  app.showMessage("活动已创建");
+}
+
+loadActivities().catch((error) => app.showMessage(error.message));
 </script>
 </body>
 </html>

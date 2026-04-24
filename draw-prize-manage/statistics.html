@@ -13,7 +13,6 @@
 </head>
 <body>
 
-<!-- 左侧固定菜单 -->
 <div style="width:240px;background:#001529;color:#fff;height:100vh;position:fixed;top:0;left:0;overflow-y:auto;box-shadow:2px 0 8px rgba(0,0,0,0.3)">
   <div style="padding:20px;font-size:22px;font-weight:bold;border-bottom:1px solid #0f2a47">统开奖平台</div>
   <ul style="list-style:none;margin:16px 0;padding:0">
@@ -28,7 +27,6 @@
   </ul>
 </div>
 
-<!-- 主内容 -->
 <div class="main">
   <h1>数据统计</h1>
 
@@ -38,46 +36,49 @@
   </div>
 
   <div class="card">
-    <h2>参与趋势（近7天）</h2>
+    <h2>参与趋势</h2>
     <canvas id="trendChart" height="140"></canvas>
   </div>
 </div>
 
+<script src="/assets/app.js"></script>
 <script>
-// 高亮当前页面菜单项 + 悬停效果
-const currentPath = window.location.pathname.split('/').pop() || 'dashboard.html';
-document.querySelectorAll('li').forEach(li => {
-  const target = li.dataset.page;
-  if (target === currentPath) {
-    li.style.background = '#1890ff';
-    li.style.fontWeight = 'bold';
-  }
-  li.addEventListener('mouseover', () => {
-    if (!li.style.background.includes('#1890ff')) li.style.background = '#0f2a47';
-  });
-  li.addEventListener('mouseout', () => {
-    if (!li.style.background.includes('#1890ff')) li.style.background = '';
-  });
-});
+app.initMenuHighlight();
+app.initAdminFloatingNav();
 
-// 图表
-new Chart(document.getElementById('statChart'), {
-  type: 'bar',
-  data: {
-    labels: ['一等奖','二等奖','三等奖','谢谢参与'],
-    datasets: [{label:'发放数量',data:[5,20,100,45600],backgroundColor:['#ff4d4f','#faad14','#52c41a','#999']}]
-  },
-  options: {scales: {y: {beginAtZero: true}}}
-});
+async function loadStatistics() {
+  const data = await app.api.get("/api/statistics");
 
-new Chart(document.getElementById('trendChart'), {
-  type: 'line',
-  data: {
-    labels: ['2/3','2/4','2/5','2/6','2/7','2/8','2/9'],
-    datasets: [{label:'参与人数',data:[3200,4800,6500,8900,12400,15600,18900],borderColor:'#1890ff',tension:0.4,fill:false}]
-  },
-  options: {scales: {y: {beginAtZero: true}}}
-});
+  new Chart(document.getElementById("statChart"), {
+    type: "bar",
+    data: {
+      labels: data.prizeStats.map((item) => item.label),
+      datasets: [{
+        label: "发放数量",
+        data: data.prizeStats.map((item) => item.value),
+        backgroundColor: ["#ff4d4f", "#faad14", "#52c41a", "#999"]
+      }]
+    },
+    options: { scales: { y: { beginAtZero: true } } }
+  });
+
+  new Chart(document.getElementById("trendChart"), {
+    type: "line",
+    data: {
+      labels: data.trend.map((item) => item.date),
+      datasets: [{
+        label: "参与人数",
+        data: data.trend.map((item) => item.count),
+        borderColor: "#1890ff",
+        tension: 0.4,
+        fill: false
+      }]
+    },
+    options: { scales: { y: { beginAtZero: true } } }
+  });
+}
+
+loadStatistics().catch((error) => app.showMessage(error.message));
 </script>
 </body>
 </html>
